@@ -13,4 +13,13 @@ export interface ConvertedTransaction {
 
 export interface ISelector {
   plnPrice: number;
+  allTransactions: ConvertedTransaction[];
+}
+
+export interface AllTransactionsPayload {
+  transactionName: string;
+  euro: number;
+  pln: number;
+  id: string;
+  plnPrice: number;
 }

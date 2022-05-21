@@ -4,11 +4,13 @@ import { AppBox } from "./style";
 import AppContent from "./components/AppContent";
 import axios from "axios";
 import Loading from "./components/Loading/Loading";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { changePlnPrice } from "./actions/plPriceAction";
+import { ISelector } from "./components/AppContent/interface";
 
 const App = () => {
   const dispatch = useDispatch();
+  const plnPrice = useSelector((state: ISelector) => state.plnPrice);
 
   const getPlnPrice = async () => {
     try {
@@ -26,6 +28,8 @@ const App = () => {
   useEffect(() => {
     getPlnPrice();
   }, []);
+
+  if (plnPrice === 0) return <Loading />;
 
   return (
     <AppBox>

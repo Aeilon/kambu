@@ -9,12 +9,17 @@ import {
   LargestAmmountBox,
 } from "./style";
 import { TransationData, ConvertedTransaction } from "./interface";
-import { v4 as uuid } from "uuid";
 import deleteButton from "../../images/delete-button.svg";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { ISelector } from "./interface";
+import {
+  addTransaction,
+  deleteTransaction,
+  refreshPlnPrice,
+} from "../../actions/allTransactionAction";
 
 const AppContent: React.FC = () => {
+  const dispatch = useDispatch();
   const plnPrice = useSelector((state: ISelector) => {
     return state.plnPrice;
   });
@@ -25,9 +30,9 @@ const AppContent: React.FC = () => {
     id: "",
   });
 
-  const [allTransactions, setAllTransactions] = useState<
-    ConvertedTransaction[]
-  >([]);
+  const allTransactions = useSelector(
+    (state: ISelector) => state.allTransactions
+  );
 
   const [highestValue, setHighestValue] = useState<ConvertedTransaction>({
     transactionName: "",
@@ -39,7 +44,7 @@ const AppContent: React.FC = () => {
   const getHighestValue = () => {
     if (allTransactions.length > 0) {
       const highestTransaction = allTransactions.reduce((prev, current) =>
-        prev.euro > current.euro ? prev : current
+        +prev.euro > +current.euro ? prev : current
       );
       setHighestValue(highestTransaction);
     }
@@ -57,47 +62,36 @@ const AppContent: React.FC = () => {
     }, 0);
   };
 
-  const handleTransactionNameChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTransationData((prevState) => ({
       ...prevState,
       [e.target.id]: e.target.value,
     }));
   };
 
-  const handleEuroChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTransationData((prevState) => ({
-      ...prevState,
-      [e.target.id]: +e.target.value,
-    }));
+  const addTransactionFn = (
+    transactionName: string,
+    euro: number,
+    plnPrice: number
+  ) => {
+    const calculatedPln = euro * plnPrice;
+
+    if (transactionName && euro > 0) {
+      dispatch(addTransaction(transactionName, euro, calculatedPln));
+    }
   };
 
-  const addTransaction = () => {
-    const { transactionName, euro } = transactionData;
-
-    if (!transactionName || euro === 0) return;
-
-    setAllTransactions((prevState) => [
-      ...prevState,
-      {
-        transactionName,
-        euro,
-        pln: euro * plnPrice,
-        id: uuid(),
-      },
-    ]);
-  };
-
-  const deleteTransaction = (id: string) => {
-    setAllTransactions((prevState) =>
-      prevState.filter((transaction) => transaction.id !== id)
-    );
+  const deleteTransactionFn = (id: string) => {
+    dispatch(deleteTransaction(id));
   };
 
   useEffect(() => {
     getHighestValue();
   }, [allTransactions]);
+
+  useEffect(() => {
+    dispatch(refreshPlnPrice(plnPrice));
+  }, [plnPrice]);
 
   return (
     <Main>
@@ -107,29 +101,40 @@ const AppContent: React.FC = () => {
           id="transactionName"
           placeholder="Transaction name"
           value={transactionData.transactionName}
-          onChange={handleTransactionNameChange}
+          onChange={handleOnChange}
         />
         <Input
           type="number"
+          min="1"
           id="euro"
           placeholder="Amount in euros"
           value={transactionData.euro}
-          onChange={handleEuroChange}
+          onChange={handleOnChange}
         />
-        <Button onClick={() => addTransaction()}>ADD TRANSACTION</Button>
+        <Button
+          onClick={() =>
+            addTransactionFn(
+              transactionData.transactionName,
+              transactionData.euro,
+              plnPrice
+            )
+          }
+        >
+          ADD TRANSACTION
+        </Button>
 
-        {highestValue.euro > 0 && (
+        {allTransactions.length > 0 && (
           <>
             <p>The transaction with the largest amount:</p>
             <LargestAmmountBox>
               <div>
                 <p>{highestValue.transactionName}</p>
-                <p>{` ${Intl.NumberFormat("de").format(
+                <p>{` ${Intl.NumberFormat("pl").format(
                   highestValue.euro
                 )}  €`}</p>
               </div>
               <div>
-                <p>{`${Intl.NumberFormat("de").format(
+                <p>{`${Intl.NumberFormat("pl").format(
                   Math.round(highestValue.pln * 100) / 100
                 )}  PLN`}</p>
               </div>
@@ -155,17 +160,17 @@ const AppContent: React.FC = () => {
                 return (
                   <tr key={id}>
                     <td>{transactionName}</td>
-                    <td>{`${Intl.NumberFormat("de").format(
+                    <td>{`${Intl.NumberFormat("pl").format(
                       Math.round(euro * 100) / 100
                     )} .-`}</td>
                     <td>
-                      {`${Intl.NumberFormat("de").format(
+                      {`${Intl.NumberFormat("pl").format(
                         Math.round(pln * 100) / 100
                       )} .-`}
                       <img
                         src={deleteButton}
+                        onClick={() => deleteTransactionFn(id)}
                         alt="delete"
-                        onClick={() => deleteTransaction(id)}
                       />
                     </td>
                   </tr>
@@ -177,12 +182,12 @@ const AppContent: React.FC = () => {
               <tr>
                 <td>sum of transactions</td>
                 <td>
-                  {`${Intl.NumberFormat("de").format(
+                  {`${Intl.NumberFormat("pl").format(
                     Math.round(getEuroSum() * 100) / 100
                   )} .-`}
                 </td>
                 <td>
-                  {`${Intl.NumberFormat("de").format(
+                  {`${Intl.NumberFormat("pl").format(
                     Math.round(getPlnSum() * 100) / 100
                   )} .-`}
                 </td>
