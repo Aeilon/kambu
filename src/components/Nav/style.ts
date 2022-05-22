@@ -9,8 +9,20 @@ export const Main = styled.div`
   align-items: center;
   padding: 0 100px;
 
-  @media (max-width: 700px) {
+  @media (max-width: 840px) {
     padding: 0 25px;
+  }
+
+  @media (max-width: 680px) {
+    min-height: 100px;
+  }
+
+  @media (max-width: 595px) {
+    flex-direction: column;
+    padding: 10px 25px;
+    gap: 20px;
+    height: auto;
+    min-height: unset;
   }
 
   img {

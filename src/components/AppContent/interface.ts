@@ -1,6 +1,6 @@
 export interface TransationData {
   transactionName: string;
-  euro: number;
+  euro: number | undefined;
   id: string;
 }
 

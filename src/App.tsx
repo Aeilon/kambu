@@ -1,23 +1,26 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Nav from "./components/Nav";
 import { AppBox } from "./style";
 import AppContent from "./components/AppContent";
-import axios from "axios";
+import api from "./services/axiosConfig";
 import Loading from "./components/Loading/Loading";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { changePlnPrice } from "./actions/plPriceAction";
-import { ISelector } from "./components/AppContent/interface";
 
 const App = () => {
+  const [loading, toggleLoading] = useState<boolean>(true);
   const dispatch = useDispatch();
-  const plnPrice = useSelector((state: ISelector) => state.plnPrice);
 
   const getPlnPrice = async () => {
+    const API_KEY = "03fd38522fa1f1cd0f47";
     try {
-      const resp = await axios.get(
-        "https://free.currconv.com/api/v7/convert?q=EUR_PLN&compact=ultra&apiKey=beb82c230e66d4d4282b"
+      toggleLoading(true);
+      const resp = await api.get(
+        `convert?q=EUR_PLN&compact=ultra&apiKey=${API_KEY}`
       );
+
       dispatch(changePlnPrice(resp.data.EUR_PLN));
+      toggleLoading(false);
     } catch (err) {
       console.error(err);
     }
@@ -29,7 +32,7 @@ const App = () => {
     getPlnPrice();
   }, []);
 
-  if (plnPrice === 0) return <Loading />;
+  if (loading) return <Loading />;
 
   return (
     <AppBox>

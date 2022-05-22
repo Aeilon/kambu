@@ -3,6 +3,7 @@ import { Main } from "./style";
 import logo from "../../images/logo.svg";
 import { useSelector } from "react-redux";
 import { ISelector } from "../AppContent/interface";
+import ChangePlnValueComponent from "./ChangePlnValueComponent";
 
 const Nav: React.FC = () => {
   const plnPrice = useSelector((state: ISelector) => {
@@ -12,7 +13,11 @@ const Nav: React.FC = () => {
   return (
     <Main>
       <img src={logo} alt="logo" />
-      <p>1 EURO = {plnPrice} PLN</p>
+      <ChangePlnValueComponent />
+      <p>
+        1 EURO ={" "}
+        {Intl.NumberFormat("pl").format(Math.round(plnPrice * 100) / 100)} PLN
+      </p>
     </Main>
   );
 };
