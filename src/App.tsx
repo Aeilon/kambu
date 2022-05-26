@@ -11,22 +11,28 @@ const App = () => {
   const [loading, toggleLoading] = useState<boolean>(true);
   const dispatch = useDispatch();
 
+  // This api key should not be exposed, data should come from backend
+
+  const API_KEY = "2sEb8LdyK1jh1r158gBPSyxMcYwyn1QAMcLTGGhT";
+  const BASE_CURRENCY = "EUR";
+  const CURRENCIES = "PLN";
+
   const getPlnPrice = async () => {
-    const API_KEY = "03fd38522fa1f1cd0f47";
     try {
       toggleLoading(true);
       const resp = await api.get(
-        `convert?q=EUR_PLN&compact=ultra&apiKey=${API_KEY}`
+        `latest?apikey=${API_KEY}&currencies=${CURRENCIES}&base_currency=${BASE_CURRENCY}`
       );
 
-      dispatch(changePlnPrice(resp.data.EUR_PLN));
+      dispatch(changePlnPrice(resp.data.data.PLN.value));
       toggleLoading(false);
     } catch (err) {
       console.error(err);
+      dispatch(changePlnPrice(4.556));
+      toggleLoading(false);
+      alert("too many requests, api doesn't work");
     }
   };
-
-  // This api key should not be exposed, data should come from backend
 
   useEffect(() => {
     getPlnPrice();

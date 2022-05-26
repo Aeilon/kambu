@@ -2,7 +2,7 @@ import axios from "axios";
 
 const createConfig = () => {
   const api = axios.create({
-    baseURL: "https://free.currconv.com/api/v7/",
+    baseURL: "https://api.currencyapi.com/v3/",
   });
 
   return api;
